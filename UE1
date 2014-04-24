@@ -1,0 +1,335 @@
+import ij.ImageJ;
+import ij.ImagePlus;
+import ij.gui.GenericDialog;
+import ij.gui.NewImage;
+import ij.plugin.PlugIn;
+import ij.process.ImageProcessor;
+
+//erste Uebung (elementare Bilderzeugung)
+
+public class GLDM_U1 implements PlugIn {
+	
+	final static String[] choices = {
+		"Schwarzes Bild",
+		"Gelbes Bild",
+		"Schwarz/Weiss Verlauf",
+		"Horiz. Schwarz/Rot vert. Schwarz/Blau Verlauf",
+		"Italienische Fahne",
+		"Bahamische Fahne",
+		"Japanische Fahne",
+		"Japanische Fahne mit weichen Kanten",
+		"Streifenmuster",
+	};
+	
+	private String choice;
+	
+	public static void main(String args[]) {
+		ImageJ ij = new ImageJ(); // neue ImageJ Instanz starten und anzeigen 
+		ij.exitWhenQuitting(true);
+		
+		GLDM_U1 imageGeneration = new GLDM_U1();
+		imageGeneration.run("");
+	}
+	
+	public void run(String arg) {
+		
+		int width  = 566;  // Breite
+		int height = 400;  // Hoehe
+		
+		// RGB-Bild erzeugen
+		ImagePlus imagePlus = NewImage.createRGBImage("GLDM_U1", width, height, 1, NewImage.FILL_BLACK);
+		ImageProcessor ip = imagePlus.getProcessor();
+		
+		// Arrays fuer den Zugriff auf die Pixelwerte
+		int[] pixels = (int[])ip.getPixels();
+		
+		dialog();
+		
+		////////////////////////////////////////////////////////////////
+		// Hier bitte Ihre Aenderungen / Erweiterungen
+		
+		if ( choice.equals("Schwarzes Bild") ) {
+			
+			// Schleife ueber die y-Werte
+			for (int y=0; y<height; y++) {
+				// Schleife ueber die x-Werte
+				for (int x=0; x<width; x++) {
+					int pos = y*width + x; // Arrayposition bestimmen
+					
+					int r = 0;
+					int g = 0;
+					int b = 0;
+					
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) |  b;
+				}
+			}
+		}
+		
+		////////////////////////////////////////////////////////////////////
+		
+		// neues Bild anzeigen
+		imagePlus.show();
+		imagePlus.updateAndDraw();
+		
+		if ( choice.equals("Gelbes Bild") ) {
+
+			// Schleife ueber die y-Werte
+			for (int y=0; y<height; y++) {
+				// Schleife ueber die x-Werte
+				for (int x=0; x<width; x++) {
+					int pos = y*width + x; // Arrayposition bestimmen
+
+					int r = 255;
+					int g = 255;
+					int b = 0;
+
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) |  b;
+				}
+			}
+		}
+		
+		if ( choice.equals("Schwarz/Weiss Verlauf") ) {
+
+			// Schleife ueber die y-Werte
+			for (int y=0; y<height; y++) {
+				// Schleife ueber die x-Werte
+				for (int x=0; x<width; x++) {
+					int pos = y*width + x; // Arrayposition bestimmen
+
+					int r = 255*x/(width-1); 
+					int g = 255*x/(width-1); // lineare Funktion  Farberhšhung in x-Richtung
+					int b = 255*x/(width-1);
+
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) |  b;
+				}
+			}
+		}
+		
+		if ( choice.equals("Horiz. Schwarz/Rot vert. Schwarz/Blau Verlauf") ) {
+
+			// Schleife ueber die y-Werte (y mit Hšhe)
+			for (int y=0; y<height; y++) {
+				// Schleife ueber die x-Werte (x mit Breite)
+				for (int x=0; x<width; x++) { // x ist KLEINER als width
+					int pos = y*width + x; // Arrayposition bestimmen
+
+					int r = 255*x/(width-1);  // ints teilen durcheinander ; x < width -> mšgl. int-wert = 0; (ZŠhler vergrš§ern)
+					int g = 0;
+					int b = 255*y/(width-1); // lineare Funktion  Farberhšhung in y-Richtung
+
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) |  b;
+				}
+			}
+		}
+		
+		if ( choice.equals("Italienische Fahne") ) {
+
+			// Schleife ueber die y-Werte
+			for (int y=0; y<height; y++) {
+				// Schleife ueber die x-Werte
+				for (int x=0; x<width; x++) {
+					int pos = y*width + x; // Arrayposition bestimmen
+
+					int r = 0;
+					int g = 0;
+					int b = 0;
+					
+					if(x <= width/3){ // Fahne wird 3 geteilt, ist x kleiner gleich der Breite, geteilt durch 3, soll
+						r = 0;
+						g = 255;  // grŸn intensiv als erste streifen
+						b = 0;
+					}else if((x >= width/3) && (x <= (width*2/3))){ // ist x grš§er gleich breite/3 und kleiner gleich 2/3 der Breite
+						r = 255; // intensiv wei§ fŸr den mittleren Streifen
+						g = 255;
+						b = 255;
+					}else if ((x >= (width*2/3)) && (x <= width)){ // ist x grš§er gleich 2/3 der Breite und kleiner als die Breite insgesamt
+						r = 255; // intensiv rot
+						g = 0;
+						b = 0;
+					}
+
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) |  b;
+				}
+			}
+		}
+		
+		if ( choice.equals("Bahamische Fahne") ) {
+
+			// Schleife ueber die y-Werte
+			for (int y=0; y<height; y++) {
+				// Schleife ueber die x-Werte
+				for (int x=0; x<width; x++) {
+					int pos = y*width + x; // Arrayposition bestimmen
+
+					int r = 0; 
+					int g = 0;
+					int b = 0;
+					  // y <= halbierte Hšhe und x kleiner als y ODER y grš§er als halbierte Hšhe und x kleiner als Hšhe minus y 
+					if((y <= height/2 && x < y) || (y > height/2 && x < (height-y))){ //Faktor vor y und (height-y) mšglich
+						r = 0; 
+						g = 0;
+						b = 0;
+					} else if((y <= height*1/3) || (y >= height*2/3)){ //oberer und unterer schwarzer Streifen
+						r = 0;
+						g = 0;
+						b = 255;
+					} else if ((y >= height*1/3) && (y <= height*2/3)){ //gelber Streifen in der Mitte
+						r = 255;
+			       	    g = 255;
+						b = 0;
+					}
+
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) |  b;
+				}
+			}
+		}
+		
+		if (choice.equals("Japanische Fahne")) {
+			int xm = width/2;	//X-Position Mittelpunkt
+			int ym = height/2;	//Y-Position Mittelpunkt
+			int r1 = height/5;	//Radius
+			
+			// Schleife ueber die y-Werte
+			for (int y = 0; y < height; y++) {
+				// Schleife ueber die x-Werte
+				for (int x = 0; x < width; x++) {
+					int pos = y * width + x; // Arrayposition bestimmen
+
+					int r = 255;
+					int g = 255;
+					int b = 255;
+
+					int rpQuadrat = (int) (Math.pow((x - xm),2) + Math.pow((y - ym),2)); //position des punktes
+					if (rpQuadrat < Math.pow(r1, 2)){ //komma 2 bedeutet hoch 2 
+						// wenn rp^2 kleiner als der Radius^2 ist, ist der Punkt im Kreis und wird rot angezeigt
+						r = 255;
+						g = 0;
+						b = 0;
+					}
+					
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) | b;
+				}
+			}
+		}
+		
+if ( choice.equals("Japanische Fahne mit weichen Kanten") ) {
+			
+			int xm = width/2;	//X-Position Mittelpunkt
+			int ym = height/2;	//Y-Position Mittelpunkt
+			int r1 = height/5;	//Radius des Kreises
+			int r2 = height/4;	//Radius weicher Kanten
+			
+			// Schleife ueber die y-Werte
+			for (int y=0; y<height; y++) {
+				// Schleife ueber die x-Werte
+				for (int x=0; x<width; x++) {
+					int pos = y*width + x; // Arrayposition bestimmen
+					
+					//wei§er Hintergrund
+					int r = 255;
+					int g = 255;
+					int b = 255;
+					
+					
+					 //rpQuadrat ist LŠnge zum Mittelpunkt
+					int rpQuadrat = (int)(Math.pow((x - xm),2) + Math.pow((y - ym),2)); //position des punktes
+					if (rpQuadrat < Math.pow(r1, 2)){ // erste Bedingung wie bei normaler Japanischer Fahne
+						r = 255;
+						g = 0;
+						b = 0;
+					}
+					 //Math.pow(r1, 2) ist Grenze ersten Radius
+					else if (rpQuadrat < Math.pow(r2, 2)){ // wenn rp kleiner ist als der zweite Radius^2 
+						g = (int)((rpQuadrat-Math.pow(r1, 2))/(Math.pow(r2, 2)-Math.pow(r1, 2))*255); // Abstand wird geteilt und mit Farbe gefŸllt
+						b = (int)((rpQuadrat-Math.pow(r1, 2))/(Math.pow(r2, 2)-Math.pow(r1, 2))*255); // je grš§er der Abstand sprich umso weiter weg desto mehr blau und grŸn
+					}
+					
+		
+					
+					
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) |  b;
+				}
+			}			 
+		}
+		
+		if ( choice.equals("Streifenmuster") ) {
+			
+			//Anzahl der Streifen
+			int n = 8;
+			
+			// Schleife ueber die y-Werte
+			for (int y=0; y<height; y++) {
+				// Schleife ueber die x-Werte
+				for (int x=0; x<width; x++) {
+					int pos = y*width + x; // Arrayposition bestimmen
+													
+					int r = 255;
+					int g = 255;
+					int b = 255;
+					
+					//Schleife fŸrs Teilen
+					for(int i=1; i<=n; i = i+2){ // ZŠhlerschleife 
+						/* horizontale Schleife fŸrs FŠrben zwischen dem Geteilten Abschnitt und dem Vorherigen
+						if(y>=height*(i-1)/n && y<height*i/n){
+							r = 0;
+							g = 0;
+							b = 0;
+						}*/
+						//vertikal Schleife fŸrs FŠrben zwischen dem Geteilten Abschnitt und dem Vorherigen
+						if(x>=width*(i-1)/n && x<width*i/n){ //ist von einem n-tel des bildes bis zu seinem vorgŠnger soll das teil geschwŠrzt werden  
+							// i = i+2 sprich nur jeder 2te Streifen wird schwarz gefŠrbt
+							r = 0;
+							g = 0;
+							b = 0;
+						}
+						
+						/* wenn man i=1 nimmt kommt width*0/n bis width*1/n
+						und wenn du n=8 definierst hast
+						width*0/8 bis width*1/8
+						da es in einer for-schleife ist, geht es immer hšher
+						2/8 bis 3/8 , 4/8 bis 5/8 und so weiter */
+
+
+						
+						
+					}
+					
+					// Werte zurueckschreiben
+					pixels[pos] = 0xFF000000 | (r << 16) | (g << 8) |  b;
+				}
+			}			 
+		}
+
+		////////////////////////////////////////////////////////////////////
+
+		// neues Bild anzeigen
+		imagePlus.show();
+		imagePlus.updateAndDraw();
+	}
+	
+	
+	private void dialog() {
+		// Dialog fuer Auswahl der Bilderzeugung
+		GenericDialog gd = new GenericDialog("Bildart");
+		
+		gd.addChoice("Bildtyp", choices, choices[0]);
+		
+		
+		gd.showDialog();	// generiere Eingabefenster
+		
+		choice = gd.getNextChoice(); // Auswahl uebernehmen
+		
+		if (gd.wasCanceled())
+			System.exit(0);
+	}
+}
+
+
